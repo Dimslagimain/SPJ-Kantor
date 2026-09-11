@@ -1,58 +1,271 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SPJ Kantor
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Dashboard pengelolaan Surat Pertanggungjawaban (SPJ) untuk membantu user mengajukan dan memantau SPJ, serta membantu bendahara memeriksa, menyetujui, dan memantau seluruh pengajuan.
 
-## About Laravel
+Aplikasi ini dibangun menggunakan Laravel, Blade, Tailwind CSS, Vite, dan MySQL/MariaDB.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fitur Utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### User
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Login ke dashboard.
+- Mengajukan SPJ baru.
+- Melihat daftar SPJ miliknya.
+- Memantau status pengajuan: menunggu review, approved, atau perlu revisi.
+- Mengubah profil dan password.
+- Logout dari aplikasi.
 
-## Learning Laravel
+### Bendahara
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- Melihat ringkasan seluruh pengajuan SPJ.
+- Melihat antrean SPJ yang menunggu review.
+- Menyetujui SPJ sehingga status berubah menjadi `approved`.
+- Mengembalikan SPJ untuk direvisi.
+- Melihat laporan berdasarkan data aktual.
+- Menambahkan dan menghapus user.
+- Mengubah profil dan password.
+- Logout dari aplikasi.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Persyaratan Sistem
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+Pastikan perangkat sudah memiliki:
 
-## Agentic Development
+- PHP 8.3 atau lebih baru.
+- Composer.
+- Node.js dan npm.
+- Laragon dengan MySQL atau MariaDB.
+- Git.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Ekstensi PHP yang dibutuhkan:
 
-```bash
-composer require laravel/boost --dev
+- `pdo_mysql`
+- `mbstring`
+- `openssl`
+- `fileinfo`
+- `tokenizer`
+- `xml`
 
-php artisan boost:install
+## Instalasi dari GitHub
+
+### 1. Clone repository
+
+Buka PowerShell atau terminal, kemudian jalankan:
+
+```powershell
+git clone https://github.com/Dimslagimain/SPJ-Kantor.git
+cd SPJ-Kantor
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Jika folder project berada di `C:\laragon\www`, gunakan:
 
-## Contributing
+```powershell
+cd C:\laragon\www
+git clone https://github.com/Dimslagimain/SPJ-Kantor.git
+cd SPJ-Kantor
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 2. Install dependency PHP
 
-## Code of Conduct
+```powershell
+composer install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 3. Install dependency frontend
 
-## Security Vulnerabilities
+```powershell
+npm install
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 4. Buat file environment
 
-## License
+```powershell
+Copy-Item .env.example .env
+php artisan key:generate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Konfigurasi default `.env` sudah disiapkan untuk MySQL Laragon:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=spj
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Sesuaikan `DB_USERNAME` dan `DB_PASSWORD` apabila konfigurasi MySQL Laragon Anda berbeda.
+
+## Menyiapkan Database Laragon
+
+### Pilihan A: Menggunakan migration Laravel
+
+1. Buka Laragon.
+2. Jalankan MySQL atau MariaDB.
+3. Buat database kosong dengan nama `spj` melalui HeidiSQL atau phpMyAdmin.
+4. Jalankan migration:
+
+```powershell
+php artisan migrate
+```
+
+File `DatabaseSeeder` tidak membuat data demo. Data user dan SPJ dapat dimasukkan melalui aplikasi.
+
+### Pilihan B: Import file SQL
+
+File SQL siap import tersedia di:
+
+```text
+database/spj_laragon.sql
+```
+
+Langkah import melalui phpMyAdmin:
+
+1. Jalankan Laragon dan aktifkan MySQL.
+2. Buka `http://localhost/phpmyadmin`.
+3. Pilih menu **Import**.
+4. Pilih file `database/spj_laragon.sql`.
+5. Jalankan proses import.
+
+File SQL berisi struktur database tanpa data SPJ atau akun dummy.
+
+## Menjalankan Dashboard
+
+### Mode development
+
+Jalankan server Laravel:
+
+```powershell
+php artisan serve
+```
+
+Pada terminal lain, jalankan Vite:
+
+```powershell
+npm run dev
+```
+
+Buka dashboard pada:
+
+```text
+http://127.0.0.1:8000
+```
+
+### Build frontend production
+
+Untuk membuat asset frontend production:
+
+```powershell
+npm run build
+```
+
+Setelah build selesai, aplikasi tetap dapat dijalankan menggunakan:
+
+```powershell
+php artisan serve
+```
+
+## Membuat User dan Bendahara
+
+Karena aplikasi tidak lagi menggunakan data dummy, akun harus dibuat dari database atau melalui fitur administrasi yang tersedia.
+
+Contoh membuat akun menggunakan Tinker:
+
+```powershell
+php artisan tinker
+```
+
+Kemudian jalankan:
+
+```php
+use App\Models\User;
+
+User::create([
+    'name' => 'Bendahara',
+    'email' => 'bendahara@example.com',
+    'password' => 'password',
+    'role' => 'bendahara',
+]);
+
+User::create([
+    'name' => 'User SPJ',
+    'email' => 'user@example.com',
+    'password' => 'password',
+    'role' => 'user',
+]);
+```
+
+Login melalui `/login` menggunakan email dan password yang telah dibuat.
+
+Setelah login sebagai bendahara, user biasa dapat ditambahkan melalui menu **Kelola User**.
+
+## Alur Penggunaan
+
+1. User login ke aplikasi.
+2. User mengisi form **Ajukan SPJ**.
+3. SPJ muncul pada menu **Pantau SPJ** dengan status menunggu review.
+4. Bendahara membuka **Antrean Review**.
+5. Bendahara memilih **Setujui SPJ** atau **Minta revisi**.
+6. Status SPJ tersimpan di database dan dapat dipantau kembali oleh user.
+
+## Pengujian
+
+Jalankan seluruh test Laravel:
+
+```powershell
+php artisan test --compact
+```
+
+Format kode PHP menggunakan Laravel Pint:
+
+```powershell
+vendor\bin\pint --format agent
+```
+
+## Struktur Direktori Penting
+
+```text
+app/
+  Http/Controllers/       Controller login, SPJ, review, dan user
+  Http/Middleware/        Middleware role user/bendahara
+  Models/                 Model User dan SPJ
+database/
+  migrations/             Struktur tabel database
+  spj_laragon.sql         Dump SQL untuk Laragon
+resources/views/
+  auth/                   Halaman login
+  pages/                  Dashboard, SPJ, laporan, dan kelola user
+  review/                 Halaman review bendahara
+routes/web.php             Route aplikasi
+```
+
+## Troubleshooting
+
+### `SQLSTATE[HY000] [1049] Unknown database 'spj'`
+
+Buat database `spj` di MySQL Laragon, atau import file `database/spj_laragon.sql`.
+
+### `could not find driver`
+
+Aktifkan ekstensi `pdo_mysql` pada `php.ini` Laragon, kemudian restart Laragon.
+
+### Asset tidak tampil
+
+Jalankan:
+
+```powershell
+npm install
+npm run build
+```
+
+Untuk development gunakan `npm run dev` bersamaan dengan `php artisan serve`.
+
+### Port 8000 sedang digunakan
+
+Gunakan port lain:
+
+```powershell
+php artisan serve --port=8001
+```
+
+Kemudian buka `http://127.0.0.1:8001`.
