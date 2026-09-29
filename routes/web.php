@@ -17,16 +17,33 @@ Route::post('/logout', [AuthController::class, 'destroy'])->middleware('auth')->
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/', function () {
+        if (auth()->user()->isReviewer() && ! auth()->user()->isBendahara()) {
+            $spjs = Spj::query();
+
+            return view('pages.reviewer-dashboard', [
+                'totalInProgress' => (clone $spjs)->whereNotIn('status', ['completed'])->count(),
+                'waitingForReviewer' => (clone $spjs)->where('current_role', auth()->user()->role)->count(),
+                'revisionSpjs' => (clone $spjs)->where('status', 'like', 'revision_%')->count(),
+                'recentSpjs' => (clone $spjs)->whereNotIn('status', ['completed'])->latest()->limit(8)->get(),
+            ]);
+        }
+
         if (! auth()->user()->isBendahara()) {
-            return view('pages.user-dashboard');
+            $userSpjs = auth()->user()->spjs();
+
+            return view('pages.user-dashboard', [
+                'recentSpjs' => (clone $userSpjs)->latest()->limit(8)->get(),
+                'pendingSpjs' => (clone $userSpjs)->whereIn('status', ['submitted', 'visitor1_review', 'visitor2_review', 'kepala_review', 'bendahara_review'])->count(),
+                'approvedSpjs' => (clone $userSpjs)->whereIn('status', ['approved', 'completed'])->count(),
+            ]);
         }
 
         $spjs = Spj::query();
 
         return view('welcome', [
             'totalSpjs' => (clone $spjs)->count(),
-            'pendingSpjs' => (clone $spjs)->where('status', 'submitted')->count(),
-            'revisionSpjs' => (clone $spjs)->where('status', 'revision')->count(),
+            'pendingSpjs' => (clone $spjs)->whereIn('status', ['visitor1_review', 'visitor2_review', 'kepala_review', 'bendahara_review'])->count(),
+            'revisionSpjs' => (clone $spjs)->where('status', 'like', 'revision_%')->count(),
             'submittedAmount' => (clone $spjs)->sum('submitted_amount'),
             'recentSpjs' => (clone $spjs)->latest()->limit(5)->get(),
         ]);
@@ -35,12 +52,17 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('role:user')->group(function (): void {
         Route::get('/spj/baru', [SpjController::class, 'create'])->name('spj.create');
         Route::post('/spj', [SpjController::class, 'store'])->name('spj.store');
+        Route::put('/spj/{spj}', [SpjController::class, 'update'])->whereNumber('spj')->name('spj.update');
+        Route::post('/spj/{spj}/resubmit', [SpjController::class, 'resubmit'])->whereNumber('spj')->name('spj.resubmit');
     });
 
     Route::get('/antrean-review', function () {
-        $spjs = auth()->user()->isBendahara()
-            ? Spj::query()->where('status', 'submitted')->latest()->get()
-            : auth()->user()->spjs()->latest()->get();
+        $user = auth()->user();
+        $spjs = $user->isReviewer()
+            ? Spj::query()->when($user->role !== 'bendahara', fn ($query) => $query->where('current_role', $user->role))
+                ->whereIn('status', ['submitted', 'visitor1_review', 'visitor2_review', 'kepala_review', 'bendahara_review'])
+                ->latest()->get()
+            : $user->spjs()->latest()->get();
 
         return view('pages.queue', ['spjs' => $spjs]);
     })->name('review.queue');
@@ -52,6 +74,7 @@ Route::middleware('auth')->group(function (): void {
 
         return view('pages.spjs', ['spjs' => $spjs]);
     })->name('spj.index');
+    Route::get('/spj/{spj}/detail', [SpjController::class, 'show'])->whereNumber('spj')->name('spj.show');
 
     Route::get('/pengaturan', [UserSettingsController::class, 'edit'])->name('settings.index');
     Route::put('/pengaturan', [UserSettingsController::class, 'update'])->name('settings.update');
@@ -68,6 +91,9 @@ Route::middleware('auth')->group(function (): void {
                 'revisionCount' => Spj::query()->where('status', 'revision')->count(),
             ]);
         })->name('reports.index');
+    });
+
+    Route::middleware('role:visitor1,visitor2,kepala_dinas,bendahara')->group(function (): void {
         Route::get('/spj/{spj}/review', [SpjReviewController::class, 'show'])->whereNumber('spj')->name('spj.review.show');
         Route::put('/spj/{spj}/review', [SpjReviewController::class, 'update'])->whereNumber('spj')->name('spj.review.update');
     });

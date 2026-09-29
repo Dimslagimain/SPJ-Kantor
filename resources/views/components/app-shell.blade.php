@@ -17,12 +17,12 @@
         <nav class="nav">
             <p class="nav-label">Ruang kerja</p>
             <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><span class="nav-icon">◫</span><span>Dashboard</span></a>
-            <a class="nav-link {{ request()->routeIs('review.queue') ? 'active' : '' }}" href="{{ route('review.queue') }}"><span class="nav-icon">▣</span><span>{{ auth()->user()->isBendahara() ? 'Antrean Review' : 'Pantau SPJ' }}</span></a>
+            <a class="nav-link {{ request()->routeIs('review.queue') ? 'active' : '' }}" href="{{ route('review.queue') }}"><span class="nav-icon">▣</span><span>{{ auth()->user()->isReviewer() ? 'Antrean Review' : 'Pantau SPJ' }}</span></a>
             @if (auth()->user()->isBendahara())
                 <a class="nav-link {{ request()->routeIs('spj.index') ? 'active' : '' }}" href="{{ route('spj.index') }}"><span class="nav-icon">▤</span><span>Semua SPJ</span></a>
                 <a class="nav-link {{ request()->routeIs('reports.index') ? 'active' : '' }}" href="{{ route('reports.index') }}"><span class="nav-icon">◈</span><span>Laporan</span></a>
                 <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}"><span class="nav-icon">♙</span><span>Kelola User</span></a>
-            @else
+            @elseif (auth()->user()->hasRole('user'))
                 <a class="nav-link {{ request()->routeIs('spj.create') ? 'active' : '' }}" href="{{ route('spj.create') }}"><span class="nav-icon">＋</span><span>Ajukan SPJ</span></a>
             @endif
             <p class="nav-label">Akun</p>
@@ -35,7 +35,7 @@
             <div class="breadcrumb">Dinas Kesehatan &nbsp;/&nbsp; <strong>{{ $title }}</strong></div>
             <div class="user-box">
                 <div class="user-avatar">{{ collect(explode(' ', auth()->user()->name))->map(fn ($part) => substr($part, 0, 1))->take(2)->implode('') }}</div>
-                <div class="user-info"><strong>{{ auth()->user()->name }}</strong><span>{{ auth()->user()->isBendahara() ? 'Bendahara Pengeluaran' : 'Pengusul SPJ' }}</span></div>
+                <div class="user-info"><strong>{{ auth()->user()->name }}</strong><span>{{ auth()->user()->isReviewer() ? ucfirst(str_replace('_', ' ', auth()->user()->role)) : 'Pengusul SPJ' }}</span></div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button class="text-button" type="submit">Keluar</button>

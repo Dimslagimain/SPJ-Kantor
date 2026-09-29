@@ -1,0 +1,438 @@
+# Product Requirement Document (PRD)
+
+## Sistem Approval Bertahap dan Tracking SPJ Dashboard
+
+## 1. Overview
+
+Dashboard SPJ merupakan sistem pengelolaan Surat Pertanggungjawaban (SPJ) yang digunakan untuk melakukan pengajuan, verifikasi, persetujuan, revisi, serta monitoring progres SPJ secara digital.
+
+Sistem akan menerapkan mekanisme approval bertingkat (multi-level approval) dimana setiap SPJ yang diajukan oleh user harus melewati beberapa tahapan persetujuan sebelum diteruskan ke proses bendahara.
+
+Alur approval:
+
+User → Visitor 1 → Visitor 2 → Kepala Dinas → Bendahara
+
+Setiap role memiliki hak akses berbeda sesuai dengan tugas dan tanggung jawabnya. Sistem juga menyediakan fitur tracking status agar user dan bendahara dapat mengetahui posisi terakhir dari setiap SPJ.
+
+---
+
+# 2. User Role
+
+## 2.1 User (Pengaju SPJ)
+
+### Hak Akses:
+
+* Membuat pengajuan SPJ baru.
+* Melihat daftar SPJ yang pernah dibuat.
+* Melihat status proses approval.
+* Melihat riwayat approval.
+* Melakukan revisi apabila SPJ dikembalikan oleh reviewer.
+* Mengirim ulang SPJ setelah melakukan revisi.
+
+### Status yang dapat dilihat:
+
+* Draft
+* Menunggu Approval Visitor 1
+* Revisi Visitor 1
+* Menunggu Approval Visitor 2
+* Revisi Visitor 2
+* Menunggu Approval Kepala Dinas
+* Revisi Kepala Dinas
+* Disetujui Kepala Dinas
+* Diproses Bendahara
+* Selesai
+
+---
+
+# 2.2 Visitor 1
+
+### Hak Akses:
+
+* Melihat SPJ yang masuk untuk diverifikasi.
+* Membuka detail SPJ.
+* Memberikan approval.
+* Mengembalikan SPJ untuk revisi.
+* Memberikan catatan revisi.
+
+### Action:
+
+## Approve
+
+Jika Visitor 1 melakukan approve:
+
+Status berubah menjadi:
+
+```
+Menunggu Approval Visitor 2
+```
+
+SPJ diteruskan otomatis ke Visitor 2.
+
+---
+
+## Revisi
+
+Jika Visitor 1 menemukan kesalahan:
+
+Status berubah menjadi:
+
+```
+Revisi Visitor 1
+```
+
+Sistem harus menyediakan:
+
+* Kolom catatan revisi.
+* Waktu revisi.
+* Nama reviewer.
+* Detail bagian yang harus diperbaiki.
+
+Contoh:
+
+```
+Status:
+Revisi Visitor 1
+
+Catatan:
+"Perbaiki nominal perjalanan dinas dan upload ulang bukti pembayaran."
+```
+
+User dapat memperbaiki kemudian submit ulang.
+
+---
+
+# 2.3 Visitor 2
+
+### Hak Akses:
+
+* Melihat SPJ yang sudah lolos Visitor 1.
+* Melakukan pemeriksaan lanjutan.
+* Approve SPJ.
+* Mengembalikan SPJ untuk revisi.
+
+### Action:
+
+## Approve
+
+Status:
+
+```
+Menunggu Approval Kepala Dinas
+```
+
+SPJ diteruskan ke Kepala Dinas.
+
+## Revisi
+
+Status:
+
+```
+Revisi Visitor 2
+```
+
+Dengan fitur:
+
+* Catatan revisi.
+* Riwayat revisi.
+* Waktu revisi.
+
+---
+
+# 2.4 Kepala Dinas
+
+### Hak Akses:
+
+* Melihat SPJ yang telah lolos Visitor 1 dan Visitor 2.
+* Melihat seluruh informasi SPJ.
+* Melakukan approval final.
+* Mengembalikan SPJ untuk revisi.
+
+---
+
+## Approve
+
+Status:
+
+```
+Disetujui Kepala Dinas
+```
+
+Kemudian SPJ diteruskan ke Bendahara.
+
+## Revisi
+
+Status:
+
+```
+Revisi Kepala Dinas
+```
+
+User harus melakukan perbaikan sebelum dikirim ulang.
+
+---
+
+# 2.5 Bendahara
+
+### Hak Akses:
+
+Bendahara berperan sebagai monitoring dan proses akhir.
+
+Bendahara dapat:
+
+* Melihat seluruh daftar SPJ.
+* Melakukan tracking posisi SPJ.
+* Melihat histori approval.
+* Melihat siapa yang sedang memproses SPJ.
+* Melihat waktu proses setiap tahap.
+
+---
+
+# 3. Workflow SPJ
+
+## Flow Utama
+
+```
+User Membuat SPJ
+        |
+        V
+Submit SPJ
+        |
+        V
+Visitor 1
+        |
+        |-- Reject/Revisi
+        |
+        V
+Visitor 2
+        |
+        |-- Reject/Revisi
+        |
+        V
+Kepala Dinas
+        |
+        |-- Reject/Revisi
+        |
+        V
+Bendahara
+        |
+        V
+Selesai
+```
+
+---
+
+# 4. Sistem Status Management
+
+Database harus memiliki status utama:
+
+| Status            | Deskripsi                 |
+| ----------------- | ------------------------- |
+| draft             | SPJ belum dikirim         |
+| submitted         | SPJ dikirim user          |
+| visitor1_review   | Menunggu Visitor 1        |
+| revision_visitor1 | Dikembalikan Visitor 1    |
+| visitor2_review   | Menunggu Visitor 2        |
+| revision_visitor2 | Dikembalikan Visitor 2    |
+| kepala_review     | Menunggu Kepala Dinas     |
+| revision_kepala   | Dikembalikan Kepala Dinas |
+| approved          | Disetujui Kepala Dinas    |
+| bendahara_review  | Diproses Bendahara        |
+| completed         | Selesai                   |
+
+---
+
+# 5. Tracking System
+
+## Dashboard User
+
+Tambahkan komponen:
+
+### SPJ Progress Tracker
+
+Contoh tampilan:
+
+```
+Pengajuan SPJ
+
+✓ User Submit
+✓ Visitor 1 Approved
+● Visitor 2 Reviewing
+○ Kepala Dinas
+○ Bendahara
+```
+
+User dapat mengetahui:
+
+* SPJ berada di role siapa.
+* Waktu terakhir perubahan status.
+* Catatan revisi jika ada.
+
+---
+
+# Dashboard Bendahara
+
+Tambahkan menu:
+
+## Monitoring SPJ
+
+Fitur:
+
+* Total SPJ masuk.
+* SPJ sedang diproses.
+* SPJ revisi.
+* SPJ selesai.
+
+Filter:
+
+* Berdasarkan tanggal.
+* Berdasarkan user.
+* Berdasarkan status.
+* Berdasarkan unit kerja.
+
+---
+
+# 6. Database Requirement
+
+## Table: spj
+
+Field:
+
+```
+id
+user_id
+nomor_spj
+judul_spj
+tanggal_pengajuan
+status
+current_role
+created_at
+updated_at
+```
+
+---
+
+## Table: approval_history
+
+Menyimpan histori seluruh proses.
+
+Field:
+
+```
+id
+spj_id
+approver_id
+role
+status
+comment
+approved_at
+created_at
+```
+
+Contoh data:
+
+| Role         | Status   | Catatan              |
+| ------------ | -------- | -------------------- |
+| Visitor 1    | Approved | -                    |
+| Visitor 2    | Revision | Nominal tidak sesuai |
+| Kepala Dinas | Pending  | -                    |
+
+---
+
+## Table: revision_history
+
+Menyimpan histori revisi.
+
+Field:
+
+```
+id
+spj_id
+revision_from_role
+description
+revision_date
+resolved_date
+```
+
+---
+
+# 7. Notification System
+
+Sistem memberikan notifikasi ketika:
+
+## User
+
+* SPJ berhasil dikirim.
+* SPJ direvisi.
+* SPJ disetujui.
+* SPJ selesai.
+
+## Reviewer
+
+* Ada SPJ baru masuk.
+* Ada SPJ revisi ulang.
+
+## Bendahara
+
+* Ada SPJ baru selesai approval Kepala Dinas.
+
+---
+
+# 8. Requirement UI
+
+## Detail SPJ
+
+Tambahkan:
+
+* Informasi pengaju.
+* Detail dokumen.
+* Status timeline.
+* Approval history.
+* Revision history.
+
+## Approval Button
+
+Untuk reviewer:
+
+```
+[Approve]
+
+[Request Revision]
+```
+
+Jika memilih revisi:
+
+Munculkan modal:
+
+```
+Alasan Revisi:
+
+__________________
+   
+Submit Revision
+```
+
+---
+
+# 9. Acceptance Criteria
+
+Sistem dianggap selesai apabila:
+
+1. User dapat membuat dan mengirim SPJ.
+2. SPJ berjalan otomatis sesuai urutan approval.
+3. Visitor 1, Visitor 2, dan Kepala Dinas dapat approve/revisi.
+4. Setiap revisi kembali ke user dengan catatan.
+5. User dapat melakukan submit ulang setelah revisi.
+6. Bendahara dapat melihat posisi setiap SPJ.
+7. Semua aktivitas tercatat pada approval history.
+8. User dan bendahara dapat melihat timeline perjalanan SPJ.
+
+---
+
+# 10. Future Improvement
+
+* Digital signature Kepala Dinas.
+* QR Code validasi SPJ.
+* Export laporan approval.
+* Dashboard statistik approval.
+* Reminder otomatis jika approval terlalu lama.
+* Integrasi email/WhatsApp notification.

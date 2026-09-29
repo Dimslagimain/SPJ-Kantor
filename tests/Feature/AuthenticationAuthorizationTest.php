@@ -34,6 +34,28 @@ class AuthenticationAuthorizationTest extends TestCase
         $this->actingAs($bendahara)->get('/laporan')->assertOk();
     }
 
+    public function test_visitors_can_review_but_cannot_create_spj(): void
+    {
+        foreach (['visitor1', 'visitor2'] as $role) {
+            $visitor = User::factory()->create(['role' => $role]);
+
+            $this->actingAs($visitor)->get('/')->assertOk()->assertSee('SPJ sedang berjalan');
+            $this->actingAs($visitor)->get(route('spj.create'))->assertForbidden();
+            $this->actingAs($visitor)->post(route('spj.store'), [])->assertForbidden();
+        }
+    }
+
+    public function test_reviewers_can_open_their_monitoring_dashboard(): void
+    {
+        foreach (['visitor1', 'visitor2', 'kepala_dinas'] as $role) {
+            $reviewer = User::factory()->create(['role' => $role]);
+
+            $this->actingAs($reviewer)->get(route('dashboard'))
+                ->assertOk()
+                ->assertSee('SPJ sedang berjalan');
+        }
+    }
+
     public function test_user_can_submit_spj(): void
     {
         $user = User::factory()->create(['role' => 'user']);
@@ -72,7 +94,7 @@ class AuthenticationAuthorizationTest extends TestCase
         $this->actingAs($bendahara)->put(route('spj.review.update', $spj), [
             'decision' => 'approved',
             'note' => 'Berkas lengkap.',
-        ])->assertRedirect(route('spj.review.show', $spj));
+        ])->assertRedirect(route('review.queue'));
 
         $this->assertDatabaseHas('spjs', [
             'id' => $spj->id,

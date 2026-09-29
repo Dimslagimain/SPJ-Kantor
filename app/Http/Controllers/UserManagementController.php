@@ -20,13 +20,14 @@ class UserManagementController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role' => ['nullable', 'in:user,visitor1,visitor2,kepala_dinas,bendahara'],
         ]);
 
         User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
-            'role' => 'user',
+            'role' => $data['role'] ?? 'user',
         ]);
 
         return redirect()->route('users.index')->with('status', 'User berhasil ditambahkan.');

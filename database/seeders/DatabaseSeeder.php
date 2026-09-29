@@ -15,8 +15,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $accounts = [
+            ['name' => 'Bendahara', 'email' => 'bendahara@example.com', 'role' => 'bendahara'],
+            ['name' => 'User SPJ', 'email' => 'user@example.com', 'role' => 'user'],
+            ['name' => 'Visitor 1', 'email' => 'visitor1@example.com', 'role' => 'visitor1'],
+            ['name' => 'Visitor 2', 'email' => 'visitor2@example.com', 'role' => 'visitor2'],
+            ['name' => 'Kepala Dinas', 'email' => 'kepala.dinas@example.com', 'role' => 'kepala_dinas'],
+        ];
 
-        // Production data is entered through the application; no demo records are seeded.
+        foreach ($accounts as $account) {
+            User::updateOrCreate(
+                ['email' => $account['email']],
+                [...$account, 'password' => 'password'],
+            );
+        }
     }
 }

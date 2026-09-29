@@ -167,7 +167,7 @@ php artisan serve
 
 ## Membuat User dan Bendahara
 
-Karena aplikasi tidak lagi menggunakan data dummy, akun harus dibuat dari database atau melalui fitur administrasi yang tersedia.
+Seeder aplikasi menyediakan akun demo untuk setiap role utama. Jalankan `php artisan db:seed` untuk membuat atau memperbarui akun tersebut.
 
 Contoh membuat akun menggunakan Tinker:
 
@@ -193,6 +193,10 @@ User::create([
     'password' => 'password',
     'role' => 'user',
 ]);
+
+User::create(['name' => 'Visitor 1', 'email' => 'visitor1@example.com', 'password' => 'password', 'role' => 'visitor1']);
+User::create(['name' => 'Visitor 2', 'email' => 'visitor2@example.com', 'password' => 'password', 'role' => 'visitor2']);
+User::create(['name' => 'Kepala Dinas', 'email' => 'kepala.dinas@example.com', 'password' => 'password', 'role' => 'kepala_dinas']);
 ```
 
 Login melalui `/login` menggunakan email dan password yang telah dibuat.

@@ -23,6 +23,16 @@ class User extends Authenticatable
         return $this->role === 'bendahara';
     }
 
+    public function hasRole(string ...$roles): bool
+    {
+        return in_array($this->role, $roles, true);
+    }
+
+    public function isReviewer(): bool
+    {
+        return $this->hasRole('visitor1', 'visitor2', 'kepala_dinas', 'bendahara');
+    }
+
     public function spjs(): HasMany
     {
         return $this->hasMany(Spj::class);
